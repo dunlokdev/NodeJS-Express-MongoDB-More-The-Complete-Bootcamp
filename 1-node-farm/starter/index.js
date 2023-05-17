@@ -1,8 +1,5 @@
 const fs = require("fs");
 const http = require("http");
-const hello = "hello world";
-
-console.log(hello);
 
 ///////////////////////////////
 // FILES
@@ -39,7 +36,6 @@ console.log(hello);
 // SERVER
 
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
-console.log("chay vo day nuk roi hihi");
 const dataObj = JSON.parse(data);
 
 const server = http.createServer((req, res) => {
