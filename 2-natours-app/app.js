@@ -1,52 +1,35 @@
-const fs = require('fs')
-const express = require('express')
+const fs = require('fs');
+const express = require('express');
 
-const app = express()
-app.use(express.json())
+const app = express();
+app.use(express.json());
 
 const tours = JSON.parse(
 	fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
-)
+);
 
-// app.get('/', (req, res) => {
-// 	res.status(200).json({
-// 		message: 'Hello from server dunlok dev',
-// 		data: 'Data in comming...',
-// 	})
-// })
-
-app.get('/api/v1/tours', (req, res) => {
+const getAllTours = (req, res) => {
 	res.status(200).json({
 		status: 'success',
 		results: tours.length,
 		data: {
 			tours,
 		},
-	})
-})
+	});
+};
 
-app.get('/api/v1/tours', (req, res) => {
-	res.status(200).json({
-		status: 'success',
-		results: tours.length,
-		data: {
-			tours,
-		},
-	})
-})
+const getTour = (req, res) => {
+	console.log(req.params);
 
-app.get('/api/v1/tours/:id', (req, res) => {
-	console.log(req.params)
+	const id = req.params.id * 1;
 
-	const id = req.params.id * 1
-
-	const tour = tours.find((el) => el.id === id)
+	const tour = tours.find((el) => el.id === id);
 
 	if (!tour) {
 		return res.status(400).json({
 			status: 'fail',
 			message: 'Invalid an id, try again',
-		})
+		});
 	}
 
 	res.status(200).json({
@@ -54,19 +37,38 @@ app.get('/api/v1/tours/:id', (req, res) => {
 		data: {
 			tour,
 		},
-	})
-})
+	});
+};
 
-app.patch('/api/v1/tours/:id', (req, res) => {
-	const id = req.params.id * 1
+const createTour = (req, res) => {
+	console.log(req.body);
+	const newId = tours[tours.length - 1].id + 1;
+	const newTour = Object.assign({ id: newId }, req.body);
+	tours.push(newTour);
 
-	const tour = tours.find((el) => el.id === id)
+	// Add new tour
+	fs.writeFile(
+		`${__dirname}/dev-data/data/tours-simple.json`,
+		JSON.stringify(tours),
+		(err) => {
+			res.status(201).json({
+				status: 'success',
+				tours: newTour,
+			});
+		}
+	);
+};
+
+const updateTour = (req, res) => {
+	const id = req.params.id * 1;
+
+	const tour = tours.find((el) => el.id === id);
 
 	if (!tour) {
 		return res.status(400).json({
 			status: 'fail',
 			message: 'Invalid an id, try again',
-		})
+		});
 	}
 
 	res.status(200).json({
@@ -74,28 +76,42 @@ app.patch('/api/v1/tours/:id', (req, res) => {
 		data: {
 			tour: '<Update tour here ... >',
 		},
-	})
-})
+	});
+};
 
-app.delete('/api/v1/tours/:id', (req, res) => {
-	const id = req.params.id * 1
+const deleteTour = (req, res) => {
+	const id = req.params.id * 1;
 
-	const tour = tours.find((el) => el.id === id)
+	const tour = tours.find((el) => el.id === id);
 
 	if (!tour) {
 		return res.status(400).json({
 			status: 'fail',
 			message: 'Invalid an id, try again',
-		})
+		});
 	}
 
 	res.status(204).json({
 		status: 'success',
 		data: null,
-	})
-})
+	});
+};
 
-const port = 3000
+// app.get('/api/v1/tours', getAllTours)
+// app.post('/api/v1/tours', createTour)
+// app.get('/api/v1/tours/:id', getTour)
+// app.patch('/api/v1/tours/:id', updateTour)
+// app.delete('/api/v1/tours/:id', deleteTour)
+
+app.route('/api/v1/tours').get(getAllTours).post(createTour);
+
+app
+	.route('/api/v1/tours/:id')
+	.get(getTour)
+	.patch(updateTour)
+	.delete(deleteTour);
+
+const port = 3000;
 app.listen(port, () => {
-	console.log(`App running on port ${port}`)
-})
+	console.log(`App running on port ${port}`);
+});
