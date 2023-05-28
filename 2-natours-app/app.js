@@ -77,6 +77,24 @@ app.patch('/api/v1/tours/:id', (req, res) => {
 	})
 })
 
+app.delete('/api/v1/tours/:id', (req, res) => {
+	const id = req.params.id * 1
+
+	const tour = tours.find((el) => el.id === id)
+
+	if (!tour) {
+		return res.status(400).json({
+			status: 'fail',
+			message: 'Invalid an id, try again',
+		})
+	}
+
+	res.status(204).json({
+		status: 'success',
+		data: null,
+	})
+})
+
 const port = 3000
 app.listen(port, () => {
 	console.log(`App running on port ${port}`)
